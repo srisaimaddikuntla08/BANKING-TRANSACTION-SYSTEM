@@ -7,11 +7,11 @@ import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 
 @Data
-@RequiredArgsConstructor
+@AllArgsConstructor
 @NoArgsConstructor
 public class ResponseDto {
 
-    private String fullname;
+    private String fullName;
     private String email;
 
     private String role;

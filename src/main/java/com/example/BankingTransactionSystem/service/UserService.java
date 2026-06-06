@@ -1,14 +1,14 @@
 package com.example.BankingTransactionSystem.service;
 
 
+import com.example.BankingTransactionSystem.dto.LoginRequest;
 import com.example.BankingTransactionSystem.dto.RequestDto;
 import com.example.BankingTransactionSystem.dto.ResponseDto;
 import com.example.BankingTransactionSystem.entity.UserEntity;
 import com.example.BankingTransactionSystem.entity.UserRole;
 import com.example.BankingTransactionSystem.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.Response;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,9 +17,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserService {
 
-    private UserRepository userRepository;
+    private final  UserRepository userRepository;
+    private PasswordEncoder passwordEncoder;
 
-    public UserEntity register(RequestDto requestDto){
+    public ResponseDto register(RequestDto requestDto){
 
         if(userRepository.existsByEmail(requestDto.getEmail())){
              throw  new RuntimeException("email already exist try another email");
@@ -30,11 +31,21 @@ public class UserService {
 
         newUser.setFullName(requestDto.getFullName());
         newUser.setEmail(requestDto.getEmail());
-        newUser.setPassword(requestDto.getPassword());
+        newUser.setPassword(passwordEncoder.encode(requestDto.getPassword()));
         newUser.setRole(role);
 
+        UserEntity savedUser = userRepository.save(newUser);
+        return mapToResponse(savedUser);
+    }
 
-        return userRepository.save(newUser);
+    public String login(LoginRequest loginRequest){
+        UserEntity user = userRepository.findByEmail(loginRequest.getEmail()).orElseThrow(()->new RuntimeException("user not found"));
+        if(!passwordEncoder.matches(loginRequest.getPassword(),user.getPassword())){
+            return "incorret Password";
+        }
+
+        return "logged";
+
     }
 
 
@@ -42,9 +53,10 @@ public class UserService {
         return userRepository.findAll().stream().map((user)->mapToResponse(user)).toList();
     }
 
-    public ResponseDto mapToResponse(UserEntity saveResponse){
+
+    private ResponseDto mapToResponse(UserEntity saveResponse){
         ResponseDto responseDto = new ResponseDto();
-        responseDto.setFullname(saveResponse.getFullName());
+        responseDto.setFullName(saveResponse.getFullName());
         responseDto.setEmail(saveResponse.getEmail());
         responseDto.setRole(String.valueOf(saveResponse.getRole()));
         return responseDto;
