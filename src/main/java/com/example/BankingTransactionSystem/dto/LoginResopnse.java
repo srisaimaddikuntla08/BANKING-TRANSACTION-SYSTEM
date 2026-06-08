@@ -1,9 +1,12 @@
 package com.example.BankingTransactionSystem.dto;
 
-import lombok.Data;
+import jakarta.persistence.GeneratedValue;
+import lombok.*;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class LoginResopnse {
     String token;
-    String message;
+
 }
