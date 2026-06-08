@@ -1,13 +1,16 @@
 package com.example.BankingTransactionSystem.service;
 
 
+import com.example.BankingTransactionSystem.JwtUtils.JwtService;
 import com.example.BankingTransactionSystem.dto.LoginRequest;
+import com.example.BankingTransactionSystem.dto.LoginResopnse;
 import com.example.BankingTransactionSystem.dto.RequestDto;
 import com.example.BankingTransactionSystem.dto.ResponseDto;
 import com.example.BankingTransactionSystem.entity.UserEntity;
 import com.example.BankingTransactionSystem.entity.UserRole;
 import com.example.BankingTransactionSystem.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +21,12 @@ import java.util.List;
 public class UserService {
 
     private final  UserRepository userRepository;
+    @Autowired
     private PasswordEncoder passwordEncoder;
+
+
+    @Autowired
+    private JwtService jwtService;
 
     public ResponseDto register(RequestDto requestDto){
 
@@ -38,13 +46,15 @@ public class UserService {
         return mapToResponse(savedUser);
     }
 
-    public String login(LoginRequest loginRequest){
+    public LoginResopnse login(LoginRequest loginRequest){
         UserEntity user = userRepository.findByEmail(loginRequest.getEmail()).orElseThrow(()->new RuntimeException("user not found"));
         if(!passwordEncoder.matches(loginRequest.getPassword(),user.getPassword())){
-            return "incorret Password";
+            throw  new RuntimeException("invalid password");
         }
 
-        return "logged";
+        String token = jwtService.generateToken(user.getEmail());
+
+        return new LoginResopnse(token);
 
     }
 

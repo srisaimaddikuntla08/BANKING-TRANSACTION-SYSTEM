@@ -1,6 +1,8 @@
 package com.example.BankingTransactionSystem.controller;
 
 
+import com.example.BankingTransactionSystem.dto.LoginRequest;
+import com.example.BankingTransactionSystem.dto.LoginResopnse;
 import com.example.BankingTransactionSystem.dto.RequestDto;
 import com.example.BankingTransactionSystem.dto.ResponseDto;
 import com.example.BankingTransactionSystem.service.UserService;
@@ -27,6 +29,13 @@ public class UserController {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
     }
+
+    @PostMapping("/login")
+    public ResponseEntity<LoginResopnse> login(@RequestBody LoginRequest loginRequest){
+        return ResponseEntity.ok(userService.login(loginRequest));
+    }
+
+
 
     @GetMapping("/read")
     public ResponseEntity<List<ResponseDto>> getAllUsers(){
